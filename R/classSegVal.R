@@ -1,18 +1,10 @@
-#' validate a Tree Prediction with CrownArea Segments
-#' @description calculates the amount of RasterCells for class "trees" which overlap with CrownArea Segments.
-#' @param pred RasterLayer - Prediction to validate
-#' @param seg PolygonLayer - segments with crown areas
-#' @param classTree numeric - the class representing Trees
+#' Validate a Tree Prediction with TreeCrown Segments
+#' @description calculates the amount of cells for class "trees" which overlap with TreeCrown Segments.
+#' @param pred RasterLayer - Prediction to be validated
+#' @param seg PolygonLayer - Segments with TreeCrowns
+#' @param classTree numeric - The class representing Trees
 #' @param reclass optional - numeric value of class to merge into class "trees", for multiple classes to merge use reclass=c(x,y)
-#' @return returns the validation score (see details)
-#' @details
-#'
-#' * Validation Score
-#' Accuracy Value: The amount of cells with class "trees" in segments to total cells of trees.
-#' in relation to segments cell without tree cells.
-#'
-#' * reclass prediction
-#' merges additional classes into class "Trees".
+#' @return returns the validation score
 #' @author Andreas Schönberg
 #' @examples
 #' # load data
@@ -31,9 +23,9 @@
 #' lau_seg <-rgdal::readOGR(seg_path)
 #' #set layer names
 #' names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
-#' ### extract values using 'exrct_Tdat' to generate Trainingdataset
+#' ### extract values using 'exrct_Tdat' to generate training dataset
 #' tDat <- exrct_Traindat(lau_tP,lau_Stk,"class")
-#' # check for class column and predictor solumns in inout Trainingdataset
+#' # check for class column and predictor columns in input training dataset
 #' head(tDat)
 #' # classification
 #' model1 <- RFclass(tDat = tDat,predCol = "default",predStk = lau_Stk,classCol = "class")
@@ -47,14 +39,14 @@
 #' tnshangras <- valSeg(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=c(2,3))
 
 
-#' @export valSeg
-#' @aliases valSeg
+#' @export classSegVal
+#' @aliases classSegVal
 
-valSeg <- function(pred,seg,classTree=NULL,reclass=NULL) {
+classSegVal <- function(pred,seg,classTree=NULL,reclass=NULL) {
 
 
 
-  cat("starting validation",sep = "\n")
+  cat("IKARUS starting validation",sep = "\n")
 
   # reclassify
   if(is.null(reclass)==FALSE){
@@ -151,6 +143,9 @@ valSeg <- function(pred,seg,classTree=NULL,reclass=NULL) {
 
 
   cat("valdiation score: class in seg @ empty seg",sep = "\n")
+
+  cat(" ",sep = "\n")
+  cat("IKARUS finished validation",sep = "\n")
   print(result)
   plot(trees)
   return(trees)

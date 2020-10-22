@@ -1,16 +1,16 @@
 #' Select best performance layers for classification
-#' @description uses a foreward featrue selection (FFS) to select the best predictors for the classification
-#' @param tDat dataframe - with values of the predictors (see details)
-#' @param predCol numeric - seq of columns with the predictor values- By default uses 1:(length(tDat)-1) for tDat fromat computed by IKARUS::exrct_Traindat
-#' @param classCol character - name of the column containing the class information, default=NULL
+#' @description uses a forward feature selection (FFS) to select the best predictors for the classification
+#' @param tDat data.frame - with values of the predictors (see details)
+#' @param predCol numeric - seq of columns with the predictor values. By default uses 1:(length(tDat)-1) for tDat format computed by 'IKARUS::exrct_Traindat'
+#' @param classCol character - name of the column containing the class information
 #' @param Cores numeric - amount of Cores to exclude from calculation, default = 1
 
-#' @return returns a classification model
-#' @details The function is used to select best fitting predictor variables for a classification.
-#'  * predCol -  Columns which should be used for the model. To select specific columns use predCol= x:y
+#' @return returns a list of best performing predictors
+#' @details The function is used to select best performing predictor variables for a classification. The
+#'  * predCol -  specific predictors can be selected by setting predCol = x:y
 #'  * tDat - the use of IKARUS::exrct_Traindat is recommended.
 #'  * parallel processing - the function uses parallel processing for multicore processors. by default all cores -1 are used.
-#' @note The function will compute a huge number of models. Depended on the sizes of the Trainingdata the
+#' @note The function will compute a huge number of models. Depending on the sizes of the training data the
 #'  process can take long time even with multicore processing.
 #' @author Andreas Schönberg
 #' @examples
@@ -65,7 +65,7 @@ BestPredFFS <- function(tDat,predCol="default",classCol=NULL,Cores=1){
   # start cores
   set.seed(112019)
   cl <- makeCluster(detectCores()-Cores)
-  cat(paste("using",length(cl),"of",length(cl)+Cores,"availible Cores"),sep="\n")
+  cat(paste("using",length(cl),"of",length(cl)+Cores,"available Cores"),sep="\n")
   registerDoParallel(cl)
   #start FFS
   cat(" ",sep = "\n")

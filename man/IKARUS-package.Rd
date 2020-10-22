@@ -3,13 +3,13 @@
 \docType{package}
 \name{IKARUS - package}
 \alias{IKARUS - package}
-\title{'CAST' based Tool for spectral Classification models}
+\title{Tool for Pixel-based Classifications}
 \description{
 In general the \code{IKARUS} package is a wrapper for the \code{CAST} package (Hanna Meyer,2020).
-\code{IKARUS} is designed to easily perform spectral classifications with \code{CAST} and provides additional functions to handle Input data.
+\code{IKARUS} is designed to easily perform pixel-based classifications with \code{CAST} and provides additional functions to handle input data.
 }
 \details{
-IKARUS spectral Classification Tool
+IKARUS Pixel-based Classification Tool
 }
 \note{
 

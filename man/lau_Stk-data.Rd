@@ -8,8 +8,8 @@
 \code{"raster::stack"}
 }
 \description{
-An RGB orthophoto merged with the NIR band of a IRC image.
-Additional artifically layers: NDVI along with Sum and Sobal filter of 3x3 for the NDVI.
-The scene shows some trees in the Lautaret vally in the frence alps.
+An RGB orthoimage merged with the NIR band of a IRC image.
+Additional artificial layers: NDVI along with Sum and Sobel filter of 3x3 for the NDVI.
+The scene shows a few trees in the Lautaret vally in the French Alps.
 Bandnames are "blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3". Resolution 0.15 meter.
 }

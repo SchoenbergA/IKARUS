@@ -2,7 +2,7 @@
 % Please edit documentation in R/RFclass.R
 \name{RFclass}
 \alias{RFclass}
-\title{simple Random Forest classification with Random Cross Validation}
+\title{Random Forest Classification with Random Cross-Validation}
 \usage{
 RFclass(
   tDat,
@@ -13,15 +13,15 @@ RFclass(
 )
 }
 \arguments{
-\item{tDat}{dataframe - with values of the predictors (see details)}
+\item{tDat}{data.frame - with values of the predictors (see details)}
 
-\item{predCol}{numeric - seq of columns with the predictor values- By default uses 1:(length(tDat)-1) for tDat fromat computed by IKARUS::exrct_Traindat}
+\item{predCol}{numeric - seq of columns with predictor values. By default uses 1:(length(tDat)-1) for tDat format computed by IKARUS::exrct_Traindat}
 
 \item{predStk}{\itemize{
 \item RasterStack - with the predictors.
 }}
 
-\item{classCol}{character - name of the column containing the class information, default=NULL}
+\item{classCol}{character - name of the column containing the class information}
 
 \item{Cores}{numeric - amount of Cores to exclude from calculation, default = 1}
 }
@@ -29,11 +29,11 @@ RFclass(
 returns a list with the model and the prediction
 }
 \description{
-classification with CV
+RF Classification with CV
 }
 \details{
 \itemize{
-\item predCol -  Columns which should be used for the model. To select specific columns use predCol= x:y.
+\item predCol -  specific predictors can be selected by setting predCol = x:y
 \item tDat - the use of IKARUS::exrct_Traindat is recommended.
 \item parallel processing - the function uses parallel processing for multicore processors. by default all cores -1 are used.
 }
@@ -46,9 +46,9 @@ tP_path <-system.file("extdata","lau_TrainPoly.shp",package = "IKARUS")
 lau_tP <-rgdal::readOGR(tP_path)
 #set layer names
 names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
-### extract values using 'exrct_Tdat' to generate Trainingdataset
+### extract values using 'exrct_Tdat' to generate training dataset
 tDat <- exrct_Traindat(lau_tP,lau_Stk,"class")
-# check for class column and predictor solumns in inout Trainingdataset
+# check for class column and predictor columns in input training dataset
 head(tDat)
 # classification
 model1 <- RFclass(tDat = tDat,predCol = "default",predStk = lau_Stk,classCol = "class")

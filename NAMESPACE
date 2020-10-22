@@ -2,8 +2,8 @@
 
 export(BestPredFFS)
 export(RFclass)
+export(classSegVal)
 export(exrct_Traindat)
-export(valSeg)
 import(CAST)
 import(caret)
 import(doParallel)

@@ -3,7 +3,7 @@
 \docType{data}
 \name{lau_TrainPoly - data}
 \alias{lau_TrainPoly - data}
-\title{Polygon layer with training areas}
+\title{Polygon layer with training areas.}
 \format{
 \code{"rgdal::readOGR"}
 }

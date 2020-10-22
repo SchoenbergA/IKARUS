@@ -14,21 +14,21 @@ exrct_Traindat(trainPoly, predStk, classCol = NULL, lyrname = names(predStk))
 \item{classCol}{character - name of the column containing the class information, default=NULL}
 }
 \value{
-Returns a dataframe with the Values of each Rasterlayer per pixel for the TrainingPolygons.
-Additionally adds a column of the respectiv class informations.
+Returns a data.frame with values of each Rasterlayer per pixel for the training polygons.
+Additionally adds a column of the respective class information.
 }
 \description{
-Extracts values from a RasterStack of predictor variables by TrainingPolygons
+Extracts values from a RasterStack of predictor variables by training polygons
 }
 \details{
-This function is used to extract TrainingData from a Raster Stack. This TraingDataset is used for IKARUS::BestPredFFS and IKARUS::RFclass.
+This function is used to extract training data from a Raster Stack. This training dataset is used for IKARUS::BestPredFFS and IKARUS::RFclass.
 \itemize{
-\item classCol - the column with infromation about the class of a polygon. Supports either char or numeric values for classes (eg 1,2,3 or "tree","stone","grass")
-\item predictor selection - specific predictors can be selected by using [[]] in 'predStk. E.g. predStk= x[\link{1:4}].
+\item classCol - the column with information about the class of a polygon. Supports either character or numeric values for classes (eg 1,2,3 or "tree","stone","grass")
+\item predictor selection - specific predictors can be selected by using [[]] in parameter 'predStk'. E.g. predStk = x[\link{1:4}].
 }
 }
 \note{
-the function will check for INF and or NA Values. INF values are first set to NA and further all NA will be deleted to prevent errors in further processing with IKARUS::BestPredFFS and IKARUS::RFclass.
+the function will check for INF and or NA values. INF values are first set to NA and further all NA will be deleted to prevent errors in further processing with IKARUS::BestPredFFS and IKARUS::RFclass.
 }
 \examples{
 # load data
@@ -40,7 +40,7 @@ tP_path <-system.file("extdata","lau_TrainPoly.shp",package = "IKARUS")
 lau_tP <-rgdal::readOGR(tP_path)
 ### check column names
 names(lau_tP)
-# -> lau_tP has both character and numeric class informations
+# -> lau_tP has both character and numeric class information
 ### extract values using character class information
 tDat <- exrct_Traindat(lau_tP,lau_Stk,"class")
 head(tDat)

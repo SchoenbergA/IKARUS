@@ -1,13 +1,13 @@
-#' simple Random Forest classification with Random Cross Validation
-#' @description classification with CV
-#' @param tDat dataframe - with values of the predictors (see details)
+#' Random Forest Classification with Random Cross-Validation
+#' @description RF Classification with CV
+#' @param tDat data.frame - with values of the predictors (see details)
 #' @param predStk - RasterStack - with the predictors.
-#' @param predCol numeric - seq of columns with the predictor values- By default uses 1:(length(tDat)-1) for tDat fromat computed by IKARUS::exrct_Traindat
-#' @param classCol character - name of the column containing the class information, default=NULL
+#' @param predCol numeric - seq of columns with predictor values. By default uses 1:(length(tDat)-1) for tDat format computed by IKARUS::exrct_Traindat
+#' @param classCol character - name of the column containing the class information
 #' @param Cores numeric - amount of Cores to exclude from calculation, default = 1
 #' @return returns a list with the model and the prediction
 #' @details
-#' * predCol -  Columns which should be used for the model. To select specific columns use predCol= x:y.
+#' * predCol -  specific predictors can be selected by setting predCol = x:y
 #' * tDat - the use of IKARUS::exrct_Traindat is recommended.
 #' * parallel processing - the function uses parallel processing for multicore processors. by default all cores -1 are used.
 #' @author Andreas Schönberg
@@ -19,9 +19,9 @@
 #' lau_tP <-rgdal::readOGR(tP_path)
 #' #set layer names
 #' names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
-#' ### extract values using 'exrct_Tdat' to generate Trainingdataset
+#' ### extract values using 'exrct_Tdat' to generate training dataset
 #' tDat <- exrct_Traindat(lau_tP,lau_Stk,"class")
-#' # check for class column and predictor solumns in inout Trainingdataset
+#' # check for class column and predictor columns in input training dataset
 #' head(tDat)
 #' # classification
 #' model1 <- RFclass(tDat = tDat,predCol = "default",predStk = lau_Stk,classCol = "class")

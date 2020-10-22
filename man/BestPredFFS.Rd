@@ -7,30 +7,30 @@
 BestPredFFS(tDat, predCol = "default", classCol = NULL, Cores = 1)
 }
 \arguments{
-\item{tDat}{dataframe - with values of the predictors (see details)}
+\item{tDat}{data.frame - with values of the predictors (see details)}
 
-\item{predCol}{numeric - seq of columns with the predictor values- By default uses 1:(length(tDat)-1) for tDat fromat computed by IKARUS::exrct_Traindat}
+\item{predCol}{numeric - seq of columns with the predictor values. By default uses 1:(length(tDat)-1) for tDat format computed by 'IKARUS::exrct_Traindat'}
 
-\item{classCol}{character - name of the column containing the class information, default=NULL}
+\item{classCol}{character - name of the column containing the class information}
 
 \item{Cores}{numeric - amount of Cores to exclude from calculation, default = 1}
 }
 \value{
-returns a classification model
+returns a list of best performing predictors
 }
 \description{
-uses a foreward featrue selection (FFS) to select the best predictors for the classification
+uses a forward feature selection (FFS) to select the best predictors for the classification
 }
 \details{
-The function is used to select best fitting predictor variables for a classification.
+The function is used to select best performing predictor variables for a classification. The
 \itemize{
-\item predCol -  Columns which should be used for the model. To select specific columns use predCol= x:y
+\item predCol -  specific predictors can be selected by setting predCol = x:y
 \item tDat - the use of IKARUS::exrct_Traindat is recommended.
 \item parallel processing - the function uses parallel processing for multicore processors. by default all cores -1 are used.
 }
 }
 \note{
-The function will compute a huge number of models. Depended on the sizes of the Trainingdata the
+The function will compute a huge number of models. Depending on the sizes of the training data the
 process can take long time even with multicore processing.
 }
 \examples{
