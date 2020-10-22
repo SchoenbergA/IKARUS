@@ -6,7 +6,7 @@ Authors@R:
            family = "Schönberg",
            role = c("aut", "cre"),
            email = "Schoenb4@stundents.uni-marburg.de")
-Description: Tool for easy usage of spectral classification with CASTCAST
+Description: Tool for easy usage of spectral classification with CAST
 License: `use_mit_license()`, `use_gpl3_license()` or friends to
     pick a license
 Encoding: UTF-8
