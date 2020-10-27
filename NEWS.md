@@ -1,3 +1,15 @@
+# IKARUS 0.0.0.92
+
+* major spelling corrections
+
+* simplified example data loading
+
+# IKARUS 0.0.0.91
+
+*new feature
+
+classSegVal - validation of Tree classification by Tree Crown Segments
+
 # IKARUS 0.0.0.9000
 initial version
 

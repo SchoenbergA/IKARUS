@@ -13,10 +13,15 @@
 #' @author Andreas Schönberg
 #' @examples
 #'# load data
-#'Stk_path <-system.file("extdata","lau_Stk.tif",package = "IKARUS")
-#'lau_Stk <- raster::stack(Stk_path)
-#'tP_path <-system.file("extdata","lau_TrainPoly.shp",package = "IKARUS")
-#' lau_tP <-rgdal::readOGR(tP_path)
+#' require(caret)
+#' require(CAST)
+#' require(doParallel)
+#' require(raster)
+#' require(IKARUS)
+#' lau_Stk <- raster::stack(system.file("extdata","lau_Stk.tif",package = "IKARUS"))
+#' lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPoly.shp",package = "IKARUS"))
+#' # handle CRS string
+#' crs(lau_tP) <- crs(lau_Stk)
 #' #set layer names
 #' names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
 #' ### extract values using 'exrct_Tdat' to generate training dataset

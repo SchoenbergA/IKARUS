@@ -14,13 +14,14 @@
 #' require(raster)
 #' require(IKARUS)
 #' require(mapview)
-#' Stk_path <-system.file("extdata","lau_Stk.tif",package = "IKARUS")
-#' lau_Stk <- raster::stack(Stk_path)
-#' tP_path <-system.file("extdata","lau_TrainPoly.shp",package = "IKARUS")
-#' lau_tP <-rgdal::readOGR(tP_path)
+#' lau_Stk <- raster::stack(system.file("extdata","lau_Stk.tif",package = "IKARUS"))
+#' lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPoly.shp",package = "IKARUS"))
+#' # handle CRS string
+#' crs(lau_tP) <- crs(lau_Stk)
 #' # load segments
-#' seg_path <-system.file("extdata","lau_TreeSeg.shp",package = "IKARUS")
-#' lau_seg <-rgdal::readOGR(seg_path)
+#' lau_seg <-rgdal::readOGR(system.file("extdata","lau_TreeSeg.shp",package = "IKARUS"))
+#' # handle CRS string
+#' crs(lau_seg) <- crs(lau_Stk)
 #' #set layer names
 #' names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
 #' ### extract values using 'exrct_Tdat' to generate training dataset
