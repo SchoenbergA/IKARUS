@@ -7,7 +7,6 @@
 # IKARUS 0.0.0.91
 
 *new feature
-
 classSegVal - validation of Tree classification by Tree Crown Segments
 
 # IKARUS 0.0.0.9000
