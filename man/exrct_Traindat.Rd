@@ -32,12 +32,14 @@ the function will check for INF and or NA values. INF values are first set to NA
 }
 \examples{
 # load data
-lau_Stk_path <-system.file("extdata","lau_Stk.tif",package = "IKARUS")
-lau_Stk <- raster::stack(lau_Stk_path)
+require(raster)
+require(IKARUS)
+lau_Stk <- raster::stack(system.file("extdata","lau_Stk.tif",package = "IKARUS"))
 #set layer names
 names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
-tP_path <-system.file("extdata","lau_TrainPoly.shp",package = "IKARUS")
-lau_tP <-rgdal::readOGR(tP_path)
+lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPoly.shp",package = "IKARUS"))
+# handle CRS string
+crs(lau_tP) <- crs(lau_Stk)
 ### check column names
 names(lau_tP)
 # -> lau_tP has both character and numeric class information

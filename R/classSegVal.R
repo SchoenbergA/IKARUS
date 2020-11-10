@@ -5,6 +5,17 @@
 #' @param classTree numeric - The class representing Trees
 #' @param reclass optional - numeric value of class to merge into class "trees", for multiple classes to merge use reclass=c(x,y)
 #' @return returns the validation score
+#' * return and plot the "tree [1] and no tree [2]" layer, will be reclassified if 'reclass' is used.
+#' * result table
+#' + nclass - amount of cells for class 'tree' (may differ if 'reclass' is used)
+#' + nseg - amount of cells for all TreeCrowns
+#' + overclass - amount of cells for classification not occuring in TreeCrowns (over classification)
+#' + underclass -  amount of cells for TreeCrowns not occuring in the classification (under classification)
+#' + hit - amount of cells for classification occuring in TreeCrowns
+#' + hitrate - amount of hit in relation to total classification cells in %
+#' + rate underclass - amount of underclass in relation to total TreeCrown cells in %
+#' + rate overclass -amount of overclass in relation to total classification cells in %
+#' * validation score hitrate @ overrate + underrate
 #' @author Andreas Schönberg
 #' @examples
 #' # load data
@@ -35,9 +46,9 @@
 #' plot(lau_seg)
 #'
 #' # test several combinations of classes for tress
-#' tree <- valSeg(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=NULL)
-#' tnsha <- valSeg(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=2)
-#' tnshangras <- valSeg(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=c(2,3))
+#' tree <- classSegVal(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=NULL)
+#' tnsha <- classSegVal(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=2)
+#' tnshangras <- classSegVal(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=c(2,3))
 
 
 #' @export classSegVal
@@ -68,7 +79,7 @@ classSegVal <- function(pred,seg,classTree=NULL,reclass=NULL) {
     } #end reclass
     pred <-pred_re
   }
-  plot(pred)
+  # plot(pred)
 
 
   # validation per segments
@@ -86,7 +97,7 @@ classSegVal <- function(pred,seg,classTree=NULL,reclass=NULL) {
   # get vector with all classes
   vec <-raster::unique(pred)
   vec <-vec[-which(vec==classTree)]
-  print(vec)
+
 
 
 
@@ -103,7 +114,7 @@ classSegVal <- function(pred,seg,classTree=NULL,reclass=NULL) {
 
     }
   } #end reclass
-  plot(trees)
+  # plot(trees)
   # reclass TreeClass to class 1
   if(classTree!=1){
     m <- c(classTree-1,classTree,1)
@@ -126,28 +137,28 @@ classSegVal <- function(pred,seg,classTree=NULL,reclass=NULL) {
   # calculate validationscore
   valiscore <- round(n21/ncla,4) # % of hits to total class
   overclass <- round(n1/ncla,4) #% of miss to toal class
-  overseg <- round(n20/nseg,4) #% of empty seg cells
+  underclass <- round(n20/nseg,4) #% of empty seg cells
   result <- data.frame(matrix(nrow = 1, ncol =8))
-  result[,1]<-ncla
-  result[,2]<-nseg
-  result[,3]<-n1
-  result[,4]<-n20
-  result[,5]<-n21
-  result[,6]<-valiscore
-  result[,7]<-overseg
-  result[,8]<-overclass
+  result[,1]<-ncla # "nclass"
+  result[,2]<-nseg # "nseg"
+  result[,3]<-n1   # "overclass"
+  result[,4]<-n20  # "underclass"
+  result[,5]<-n21 # "hit"
+  result[,6]<-valiscore # "hitrate"
+  result[,7]<-underclass # "rate underclass"
+  result[,8]<-overclass # "rate overclass"
   names(result)<- c("nclass","nseg","overclass","underclass","hit",
                     "hitrate","rate underclass","rate overclass")
+  cat(" ",sep = "\n")
+  valscore <- paste(valiscore,"@",underclass+overclass)
 
-  valscore <- paste(valiscore,"@underclass",overseg,"@overclass",overclass)
 
 
-
-  cat("valdiation score: class in seg @ empty seg",sep = "\n")
-
+  cat(paste("valdiation score: ",valscore),sep = "\n")
+  print(result)
   cat(" ",sep = "\n")
   cat("IKARUS finished validation",sep = "\n")
-  print(result)
+  #print(result)
   plot(trees)
   return(trees)
 

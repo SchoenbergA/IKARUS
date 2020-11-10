@@ -1,0 +1,184 @@
+---
+title: "IKARUS - usage"
+author: "Andreas Schönberg"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+  theme: united
+
+vignette: >
+  %\VignetteIndexEntry{CENITH_tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(fig.width = 5)
+```
+
+## Introduction
+
+### Install and Help
+
+First install the package and load it into the environment.
+NOTE: devtools package is neccesary to install IKARUS via Github.
+```{r, message = FALSE, warning=FALSE}
+#devtools::install_github("SchoenbergA/IKARUS@master")
+require(IKARUS)
+
+```
+
+For help about the functions provided by IKARUS see the help:
+
+```{r, message = FALSE, warning=FALSE}
+help(package="IKARUS")
+```
+
+## Example of Usage
+
+This tutorial will give an example how to use IKARUS for pixel-based classification approaches.
+
+### Training Polygons
+
+For the training of classes we need to create some polygons which represent the respectiv classes.
+Use Qgis or another GIS to draw polygons over areas with the desired classes. E.g. if trees should be one class draw some polygons where trees can be found. Note that the size and extent of the polygon could lead to different results in a classification. Try to use small polygons and only catch areas where you can be sure that there are trees. Further note that the maschine learing alogrithm will ne at least 2 classes. To classify e.g. "trees" and "no trees" only 2 classes are require. Each polygon requires at least 1 column for the class. Both numeric and character is supported by IKARUS.
+
+For this simple example we will use the example data from the IKARUS package. First load the predictor RasterStack and the training polygons. The polygon have columns for both numeric and character infromation about the classes. The classes are: "gras", "tree", "soil" and "shadow".
+
+```{r, message = FALSE, warning=FALSE,results='hide'}
+# load data
+require(raster)
+require(mapview)
+# load predictor RasterStack
+lau_Stk <- raster::stack(system.file("extdata","lau_Stk.tif",package = "IKARUS"))
+#set layer names
+names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
+# load training polygons
+lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPoly.shp",package = "IKARUS"))
+# handle CRS string
+crs(lau_tP) <- crs(lau_Stk)
+```
+
+```{r, message = FALSE, warning=FALSE}
+### check column names
+names(lau_tP)
+# check classes
+unique(lau_tP$class)
+
+# plot polygons and TCC
+mapview::viewRGB(lau_Stk,3,2,1)+mapview(lau_tP,zcol="class")
+```
+
+### Extract the Training Data
+
+With the training polygons the cell values for the predictors can be extracted with function 'IKARUS::exrct_Traindat()'. To create a Training Dataset at least one predictor is required. For simple classifications those predictor could be the RGB bands of an RGB image. For a more complex classification artifical layers are recommended.
+
+```{r, message = FALSE, warning=FALSE,results='hide'}
+
+### extract values for all predictors
+tDat <- exrct_Traindat(lau_tP,lau_Stk,"class")
+### extract values for predictors red, green and blue only
+#tDat_RGB <- exrct_Traindat(lau_tP,lau_Stk[[1:3]],"class")
+```
+
+```{r, message = FALSE, warning=FALSE}
+head(tDat)
+#head(tDat_RGB)
+
+```
+The Training Dataset 'tDat' now contains the cell value for any used predictor for any cell for each class.
+
+
+### Classification with Crossvalidation
+
+The basic function for classification in IKARUS using a Random Forest algorithem is 'IKARUS::RFclass'.
+It requires the training dataset and the predictor RasterStack. By default the function uses all predictors in the RasterStack and training dataset (predCol = "default"). At least the function requires the name of the column with the class.
+
+```{r, message = FALSE, warning=FALSE,results='hide'}
+require(doParallel)
+# classification using all predictors
+model1 <- RFclass(tDat = tDat,predCol = "default",predStk = lau_Stk, classCol = "class")
+#check model
+model1$model_cv
+```
+
+```{r, message = FALSE, warning=FALSE}
+# plot prediction
+plot(model1$prediction)
+
+# classification with only RGB + NIR
+#model2 <- RFclass(tDat = tDat,predCol = 1:4,predStk = lau_Stk[[1:4]],classCol = "class")
+#check model
+# model2$model_cv
+# plot prediction
+# plot(model2$prediction)
+```
+The returning classification used numeric values for the classes in alphabetic order of the class names.
+order of classes: [1] "gras", [2]"shadow", [3] "soil", [4] "tree"
+
+### Valdiation with Tree Crown Segments
+
+To estimate the quality of the classification for trees IKARUS come with the function 'classSegVal' to compare a classification with tree crown segments.
+
+```{r, message = FALSE, warning=FALSE,results='hide'}
+# load segments
+lau_seg <-rgdal::readOGR(system.file("extdata","lau_TreeSeg.shp",package = "IKARUS"))
+# handle CRS string
+crs(lau_seg) <- crs(lau_Stk)
+```
+
+```{r, message = FALSE, warning=FALSE}
+# view segments with classification
+mapview(model1$prediction)+lau_seg
+
+
+```
+
+We can see that within the tree crown segments both the classes 'tree' and 'shadow' occure.
+Now lets run 'classSegVal'. NOTE: The tree crowns are computed based on LIDAR data while the classification is based on spectral data. We can see that there are cells for class 'tree' outside of the tree crowns while cells of class 'shadow' occure both inside and outside of the tree crowns. This effect come from the different data source. In general there will be a 'shift' but 'classSegVal' helps to estimate which combination of "sub-classes" for trees would represent the tree crown in the best way. 
+
+```{r, message = FALSE, warning=FALSE}
+# validate class 'tree' with TreeCrowns
+tree <- classSegVal(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=NULL)
+
+```
+
+Using only class 'tree' we receive a hugh amount of miss.
+
+```{r, message = FALSE, warning=FALSE}
+# validate class 'tree' and 'shadow' with TreeCrowns
+tnsha <- classSegVal(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=2)
+
+```
+
+Using both 'tree' and 'shadow' the miss decreases significantly.
+In the case of this example the resulting 'reclassfied' layer would represent the tree in a better way that using only the class 'tree'
+
+NOTE: this result highly depends on the assigned classes. It only shows the problem of shadow in a classification.
+
+### Foreward Feature Selection (FFS)
+
+To this point we used all predictors in the machine learning. The function 'BestPredFFS' is used to train several models with different combinations of predictors and will return the best combination based on the cross validation. The FFS can take a long time to perform. In this example we will use only 4 predictors to save some time.
+
+```{r, message = FALSE, warning=FALSE,results='hide'}
+# FFS with all layers in the RasterStack (this example could take some minutes)
+# ffs <- BestPredFFS(tDat=tDat,classCol = "class")
+# FFS with selected layers "blue","green","red","nir"
+ffs1 <- BestPredFFS(tDat=tDat,predCol = 1:4,classCol = "class")
+```
+
+```{r, message = FALSE, warning=FALSE}
+ffs1$selectedvars
+```
+Now we can use the selected predictors in 'IKARUS::RFclass' leading to the 'best' prediction.
+NOTE: in this example we used only 4 predictors so that the resulting model has higher error rates than the model we calculated earlier. 
+
+### FFS Usage for large areas
+
+Due to the long processing time the FFS is not recommended for large areas. The idea is to use the FFS in a small subarea to select the predictors and than use those selected predictors for a greater area. It is recommended to use this workflow only for homogenious areas based on the same data source. For more safety the FFS could be used in several small areas to test if the same predictors are selected.
+
+Further note that the results of the FFS highly depend on the predictor RasterStack.
+
+Best regards
+Andreas Schönberg

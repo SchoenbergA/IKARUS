@@ -17,6 +17,23 @@ classSegVal(pred, seg, classTree = NULL, reclass = NULL)
 }
 \value{
 returns the validation score
+\itemize{
+\item return and plot the "tree \link{1} and no tree \link{2}" layer, will be reclassified if 'reclass' is used.
+\item result table
+}
+\itemize{
+\item nclass - amount of cells for class 'tree' (may differ if 'reclass' is used)
+\item nseg - amount of cells for all TreeCrowns
+\item overclass - amount of cells for classification not occuring in TreeCrowns (over classification)
+\item underclass -  amount of cells for TreeCrowns not occuring in the classification (under classification)
+\item hit - amount of cells for classification occuring in TreeCrowns
+\item hitrate - amount of hit in relation to total classification cells in \%
+\item rate underclass - amount of underclass in relation to total TreeCrown cells in \%
+\item rate overclass -amount of overclass in relation to total classification cells in \%
+}
+\itemize{
+\item validation score hitrate @ overrate + underrate
+}
 }
 \description{
 calculates the amount of cells for class "trees" which overlap with TreeCrown Segments.
@@ -29,13 +46,14 @@ require(doParallel)
 require(raster)
 require(IKARUS)
 require(mapview)
-Stk_path <-system.file("extdata","lau_Stk.tif",package = "IKARUS")
-lau_Stk <- raster::stack(Stk_path)
-tP_path <-system.file("extdata","lau_TrainPoly.shp",package = "IKARUS")
-lau_tP <-rgdal::readOGR(tP_path)
+lau_Stk <- raster::stack(system.file("extdata","lau_Stk.tif",package = "IKARUS"))
+lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPoly.shp",package = "IKARUS"))
+# handle CRS string
+crs(lau_tP) <- crs(lau_Stk)
 # load segments
-seg_path <-system.file("extdata","lau_TreeSeg.shp",package = "IKARUS")
-lau_seg <-rgdal::readOGR(seg_path)
+lau_seg <-rgdal::readOGR(system.file("extdata","lau_TreeSeg.shp",package = "IKARUS"))
+# handle CRS string
+crs(lau_seg) <- crs(lau_Stk)
 #set layer names
 names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
 ### extract values using 'exrct_Tdat' to generate training dataset
@@ -49,9 +67,9 @@ plot(model1$prediction)
 plot(lau_seg)
 
 # test several combinations of classes for tress
-tree <- valSeg(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=NULL)
-tnsha <- valSeg(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=2)
-tnshangras <- valSeg(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=c(2,3))
+tree <- classSegVal(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=NULL)
+tnsha <- classSegVal(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=2)
+tnshangras <- classSegVal(  pred=model1$prediction,  seg=lau_seg,  classTree=4,  reclass=c(2,3))
 }
 \author{
 Andreas Schönberg

@@ -1,3 +1,15 @@
+# IKARUS 0.0.0.93
+
+* add vignette
+
+* some bugfixing
+ClassSegVal - now example calls correct function name
+ClassSegVal - help now contains description for the resulting tabel
+ClassSegVal - some changes in code and returning table
+RFclass - now example calls correct variable
+
+
+
 # IKARUS 0.0.0.92
 
 * major spelling corrections

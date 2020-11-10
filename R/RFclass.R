@@ -33,7 +33,7 @@
 #' #check model
 #' model1$model_cv
 #' # plot prediction
-#' plot(model$prediction)
+#' plot(model1$prediction)
 #' # classification with only RGB + NIR
 #' model2 <- RFclass(tDat = tDat,predCol = 1:4,predStk = lau_Stk[[1:4]],classCol = "class")
 #' #check model
