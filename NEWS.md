@@ -1,3 +1,8 @@
+# IKARUS 0.1.0
+release version
+
+* add IKARUS_usage.html 
+
 # IKARUS 0.0.0.93
 
 * add vignette
