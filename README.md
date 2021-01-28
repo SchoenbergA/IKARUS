@@ -1,8 +1,19 @@
-### IKARUS
+## IKARUS - spatial classification
+IKARUS is a warpper for Hannah Meyers 'CAST' for a more easy workflow for classifications. The package contains function for the computation of TrainingDatasets aswell as for the random forest based classification. It supports the Leave-Location-Out Cross Validation (LLOCV) approach.
+For an introduction see the vignette: IKARUS_usage.html
 
-A wrapper for Hanna Meyers 'CAST' for an easier way to run random forest based classifications.
+## Installation
+Install via devtools from github:
 
-Select branch 'master' for the recent version of IKARUS.
+``` r
+# current version (without LLOCV)
+devtools::install_github("SchoenbergA/IKARUS@master")
+# develop version for LLOCV
+devtools::install_github("SchoenbergA/IKARUS@develop")
 
-## LLOCV workflow
-In the 'develop' branch the functions are modified to run classifications with leave location out cross validation.
+```
+
+## Current in work
+
+ATM working on automated computation of TrainPoly from input SpatialPoint layers.
+Further working on functions for automated classification and estimating AOA in one line of code.
