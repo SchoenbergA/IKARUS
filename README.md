@@ -15,5 +15,5 @@ devtools::install_github("SchoenbergA/IKARUS@develop")
 
 ## Current in work
 
-ATM working on automated computation of TrainPoly from input SpatialPoint layers.
+Actual working on automated computation of TrainPoly from input SpatialPoint layers.
 Further working on functions for automated classification and estimating AOA in one line of code.
