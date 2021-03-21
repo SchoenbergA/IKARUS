@@ -25,16 +25,15 @@
 #' require(raster)
 #' require(IKARUS)
 #' require(mapview)
-#' lau_Stk <- raster::stack(system.file("extdata","lau_Stk.tif",package = "IKARUS"))
-#' lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPoly.shp",package = "IKARUS"))
+#' lau_Stk <- raster::stack(system.file("extdata","lau_RGB.grd",package = "IKARUS"))
+#' lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPolygon.shp",package = "IKARUS"))
 #' # handle CRS string
 #' crs(lau_tP) <- crs(lau_Stk)
 #' # load segments
 #' lau_seg <-rgdal::readOGR(system.file("extdata","lau_TreeSeg.shp",package = "IKARUS"))
 #' # handle CRS string
 #' crs(lau_seg) <- crs(lau_Stk)
-#' #set layer names
-#' names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
+
 #' ### extract values using 'exrct_Tdat' to generate training dataset
 #' tDat <- exrct_Traindat(lau_tP,lau_Stk,"class")
 #' # check for class column and predictor columns in input training dataset

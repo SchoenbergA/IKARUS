@@ -20,19 +20,14 @@
 #' require(doParallel)
 #' require(raster)
 #' require(IKARUS)
-#' lau_Stk <- raster::stack(system.file("extdata","lau_Stk.tif",package = "IKARUS"))
-#' lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPoly.shp",package = "IKARUS"))
-#' #set layer names and handle CRS string
-#' names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
+#' lau_Stk <- raster::stack(system.file("extdata","lau_RGB.grd",package = "IKARUS"))
+#' lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPolygon.shp",package = "IKARUS"))
 #' crs(lau_tP) <- crs(lau_Stk)
 #' ### extract values using 'IKARUS::exrct_Traindat'
 #' tDat <- exrct_Traindat(lau_tP,lau_Stk,"class")
 
 #' # FFS with all layers in the RasterStack (this example could take some minutes)
 #' #ffs <- BestPredFFS(tDat=tDat,classCol = "class")
-
-#' # FFS with selected layers "blue","green","red","nir"
-#' ffs1 <- BestPredFFS(tDat=tDat,predCol = 1:4,classCol = "class")
 
 #' # some code to look at the results
 #' ffs1$selectedvars # show seleted variables

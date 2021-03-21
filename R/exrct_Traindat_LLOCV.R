@@ -18,10 +18,8 @@
 #' # load data
 #' require(raster)
 #' require(IKARUS)
-#' lau_Stk <- raster::stack(system.file("extdata","lau_Stk.tif",package = "IKARUS"))
-#' #set layer names
-#' names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
-#' lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPoly_LLOCV2.shp",package = "IKARUS"))
+#' lau_Stk <- raster::stack(system.file("extdata","lau_RGB.grd",package = "IKARUS"))
+#' lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPolygon.shp",package = "IKARUS"))
 #' # handle CRS string
 #' crs(lau_tP) <- crs(lau_Stk)
 #' ### check column names
@@ -67,7 +65,7 @@ exrct_Traindat_LLOCV <- function(trainPoly,predStk,classCol=NULL,locname=NULL,ly
   trainPoly[[locpos]]
   as.factor(trainPoly[[locpos]])
 
-  #rasterize
+  # rasterize
   shp2rst <- raster::rasterize(trainPoly,predStk,field=classCol)
   #plot(shp2rst)
   locID <- raster::rasterize(trainPoly,predStk,field=locname)
@@ -77,6 +75,7 @@ exrct_Traindat_LLOCV <- function(trainPoly,predStk,classCol=NULL,locname=NULL,ly
   masked <- maskedStk[[1]]
   names(masked) <-classCol
 
+  # add mask and get values
   trainStk <- addLayer(predStk,masked,locID)
   names(trainStk) <- c(names(predStk),classCol,"locationID")
   dat <- getValues(trainStk)
@@ -101,7 +100,7 @@ exrct_Traindat_LLOCV <- function(trainPoly,predStk,classCol=NULL,locname=NULL,ly
   # transform to dataframe
   TrainDat <- as.data.frame(dat_clean)
 
-  #rename factors to input names
+  #rename factors to input names for location
   for (i in (1:max(TrainDat$locationID))){
     TrainDat$locationID[TrainDat$locationID==i] <- lvlLoc[i]
   }
@@ -111,9 +110,10 @@ exrct_Traindat_LLOCV <- function(trainPoly,predStk,classCol=NULL,locname=NULL,ly
   for (i in (1:max(TrainDat$class))){
     TrainDat$class[TrainDat$class==i] <- lvlClass[i]
   }
-  # change name to org input name
+  # change name to org input name for class
   names(TrainDat)[names(TrainDat) == "class"] <-classCol
-  #add location by class
+
+  #add location by class for LLOCV
   TrainDat$class_location <- paste(TrainDat$class,sep="_",TrainDat$locationID)
   cat(" ",sep = "\n")
   cat("IKARUS finished Extraction",sep = "\n")

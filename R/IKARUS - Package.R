@@ -25,8 +25,14 @@ NULL
 #' @format \code{"raster::stack"}
 NULL
 #' @docType data
-#' @name lau_TrainPoly - data
+#' @name lau_TrainPolygon - data
 #' @title Polygon layer with training areas.
 #' @description  Polygon layer with training areas for 'lau_Stk'.
+#' @format \code{"rgdal::readOGR"}
+NULL
+#' @docType data
+#' @name lau_TPoints - data
+#' @title Point layer with training areas.
+#' @description  Point layer with training areas for 'lau_Stk'.
 #' @format \code{"rgdal::readOGR"}
 NULL

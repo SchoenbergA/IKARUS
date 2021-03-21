@@ -20,12 +20,10 @@
 #' require(doParallel)
 #' require(raster)
 #' require(IKARUS)
-#' lau_Stk <- raster::stack(system.file("extdata","lau_Stk.tif",package = "IKARUS"))
-#' lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPoly_LLOCV2.shp",package = "IKARUS"))
+#' lau_Stk <- raster::stack(system.file("extdata","lau_RGB.grd",package = "IKARUS"))
+#' lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPolygon.shp",package = "IKARUS"))
 #' # handle CRS string
 #' crs(lau_tP) <- crs(lau_Stk)
-#' #set layer names
-#' names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
 #' ### extract values using 'exrct_Tdat' to generate training dataset
 #' tDat <- exrct_Traindat_LLOCV(lau_tP,lau_Stk,classCol="class",locname="location")
 #' # check for class column and predictor columns in input training dataset
@@ -36,12 +34,6 @@
 #' model1$model_LLOCV
 #' # plot prediction
 #' plot(model1$prediction)
-#' # classification with only RGB + NIR
-#' model2 <- RFclass_LLOCV(tDat = tDat,predCol = 1:4,predStk = lau_Stk[[1:4]],classCol = "class")
-#' #check model
-#' model2$model_LLOCV
-#' # plot prediction
-#' plot(model2$prediction)
 
 #' @export RFclass_LLOCV
 #' @aliases RFclass_LLOCV
@@ -70,9 +62,13 @@ RFclass_LLOCV <- function(tDat,predCol="default",predStk=NULL,classCol="class",c
   if(any(names(tDat)==classCol)==FALSE){
     stop("selected column name for 'classCol' could not be found in tDat")
   }
+
+  ### prepare input parameters and default
+
   # prepare class column
   classColumn <- which(names(tDat)==classCol)
-  # prepare predictor columns
+
+  # prepare predictor columns if default
   if(any(predCol=="default")==TRUE){
     predCol <- seq(1:(length(tDat)-3))
   }
@@ -85,45 +81,54 @@ RFclass_LLOCV <- function(tDat,predCol="default",predStk=NULL,classCol="class",c
   }
   cat("using predictors:  ")
   cat(paste(names(tDat[,predCol]),collapse = ", "),sep="\n")
+
   # prepare Cores
   cl =  makeCluster(detectCores()-Cores)
   cat(paste("using",length(cl),"of",length(cl)+Cores,"availible Cores"),sep="\n")
 
-              #set seed
-              set.seed(112019)
-              #create Spacefolds, k= amount of unique spatial units
-              indices = CAST::CreateSpacetimeFolds(tDat, spacevar = classLocCol, k = nk)
-              #set seed
+  ### prepare LLOCV
 
+  #set seed
+  set.seed(112019)
 
-              set.seed(112019)
-              #create trainControl for LLOCV
-              tC <-trainControl(method = "cv", classProbs = TRUE, index = indices$index, indexOut = indices$indexOut)
-              cat(" ",sep = "\n")
-              cat("IKARUS starting model with LLOCV",sep = "\n")
-              # start cores
-              set.seed(112019)
-              registerDoParallel(cl)
-              #start RF LLOCV
-              starttime <- Sys.time()
-              LLOCVmodel = caret::train(tDat[,predCol],
-                                        tDat[,classColumn],
-                                        method = "rf", withinSE = FALSE, metric= "Kappa",
-                                        importance = TRUE, trControl = tC)
+  #create Spacefolds, k= amount of unique spatial units
+  indices = CAST::CreateSpacetimeFolds(tDat, spacevar = classLocCol, k = nk)
+
+  #set seed
+  set.seed(112019)
+
+  #create trainControl for LLOCV
+  tC <-trainControl(method = "cv", classProbs = TRUE, index = indices$index, indexOut = indices$indexOut)
+  cat(" ",sep = "\n")
+  cat("IKARUS starting model with LLOCV",sep = "\n")
+  # start cores
+  set.seed(112019)
+  registerDoParallel(cl)
+
+  #start RF LLOCV
+  starttime <- Sys.time()
+  LLOCVmodel = caret::train(tDat[,predCol],
+                            tDat[,classColumn],
+                            method = "rf", withinSE = FALSE, metric= "Kappa",
+                            importance = TRUE, trControl = tC)
   #stop RF
   stopCluster(cl)
   stoptime <- Sys.time()
+
+  # calculate time
   diftim <-round(difftime(stoptime,starttime,units = "hours"),4)
   cat(" ",sep = "\n")
   cat("finished model",sep = "\n")
   cat(paste0("needed ",diftim," hours",sep = "\n"))
   cat("best result:",sep = "\n")
   cat(" ",sep = "\n")
+
   # results
   print(subset(LLOCVmodel$results, mtry == LLOCVmodel$bestTune[1,1]))
   cat("order of classes:",sep = "\n")
   print(LLOCVmodel$level[1:length(LLOCVmodel$level)])
   cat(" ",sep = "\n")
+
   # predict
   cat("IKARUS starting prediciton",sep = "\n")
 
