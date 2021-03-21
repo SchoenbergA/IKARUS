@@ -46,11 +46,11 @@ crs(lau_tP) <- crs(lau_Stk)
 ### extract values using 'IKARUS::exrct_Traindat'
 tDat <- exrct_Traindat(lau_tP,lau_Stk,"class")
 # FFS with all layers in the RasterStack (this example could take some minutes)
-#ffs <- BestPredFFS(tDat=tDat,classCol = "class")
+ffs <- BestPredFFS(tDat=tDat,classCol = "class")
 # some code to look at the results
-ffs1$selectedvars # show seleted variables
-ffs1$perf_all # show performance of all combinations
-ffs1$finalModel # show confusion matrix
+ffs$selectedvars # show seleted variables
+ffs$perf_all # show performance of all combinations
+ffs$finalModel # show confusion matrix
 }
 \author{
 Andreas Schönberg
