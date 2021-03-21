@@ -2,6 +2,8 @@
 
 export(BestPredFFS)
 export(BestPredFFS_LLOCV)
+export(ClassVal)
+export(Dawn)
 export(RFclass)
 export(RFclass_LLOCV)
 export(classSegVal)
