@@ -1,6 +1,6 @@
 Package: IKARUS
 Title: Classification Tool
-Version: 0.1.0.9100
+Version: 0.1.0.9200
 Authors@R: 
     person(given = "Andreas",
            family = "Schönberg",
