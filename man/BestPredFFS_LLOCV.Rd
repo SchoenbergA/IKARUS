@@ -53,20 +53,16 @@ require(CAST)
 require(doParallel)
 require(raster)
 require(IKARUS)
-lau_Stk <- raster::stack(system.file("extdata","lau_Stk.tif",package = "IKARUS"))
-lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPoly_LLOCV2.shp",package = "IKARUS"))
+lau_Stk <- raster::stack(system.file("extdata","lau_RGB.grd",package = "IKARUS"))
+lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPolygon.shp",package = "IKARUS"))
 # handle CRS string
 crs(lau_tP) <- crs(lau_Stk)
-#set layer names
-names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
 ### extract values using 'exrct_Tdat' to generate training dataset
 tDat <- exrct_Traindat_LLOCV(lau_tP,lau_Stk,classCol="class",locname="location")
 # check for class column and predictor columns in input training dataset
 head(tDat)
 # FFS with all layers in the RasterStack (this example could take some minutes)
 #ffs <- BestPredFFS_LLOCV(tDat=tDat,classCol = "class",classLocCol="class_location",nk=5)
-# FFS with selected layers "blue","green","red","nir"
-ffs2 <- BestPredFFS_LLOCV(tDat=tDat,predCol = 1:4,classCol = "class",classLocCol="class_location",nk=5)
 # some code to look at the results
 ffs1$selectedvars # show seleted variables
 ffs1$perf_all # show performance of all combinations

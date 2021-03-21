@@ -45,12 +45,10 @@ require(CAST)
 require(doParallel)
 require(raster)
 require(IKARUS)
-lau_Stk <- raster::stack(system.file("extdata","lau_Stk.tif",package = "IKARUS"))
-lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPoly.shp",package = "IKARUS"))
+lau_Stk <- raster::stack(system.file("extdata","lau_RGB.grd",package = "IKARUS"))
+lau_tP <-rgdal::readOGR(system.file("extdata","lau_TrainPolygon.shp",package = "IKARUS"))
 # handle CRS string
 crs(lau_tP) <- crs(lau_Stk)
-#set layer names
-names(lau_Stk)<- c("blue","green","red","nir","NDVI","NDVI_sum3","NDVI_sobel3")
 ### extract values using 'exrct_Tdat' to generate training dataset
 tDat <- exrct_Traindat(lau_tP,lau_Stk,"class")
 # check for class column and predictor columns in input training dataset
@@ -59,14 +57,6 @@ head(tDat)
 model1 <- RFclass(tDat = tDat,predCol = "default",predStk = lau_Stk,classCol = "class")
 #check model
 model1$model_cv
-# plot prediction
-plot(model1$prediction)
-# classification with only RGB + NIR
-model2 <- RFclass(tDat = tDat,predCol = 1:4,predStk = lau_Stk[[1:4]],classCol = "class")
-#check model
-model2$model_cv
-# plot prediction
-plot(model2$prediction)
 }
 \author{
 Andreas Schönberg

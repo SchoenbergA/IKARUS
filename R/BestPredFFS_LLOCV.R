@@ -31,12 +31,12 @@
 #' # check for class column and predictor columns in input training dataset
 #' head(tDat)
 #' # FFS with all layers in the RasterStack (this example could take some minutes)
-#' #ffs <- BestPredFFS_LLOCV(tDat=tDat,classCol = "class",classLocCol="class_location",nk=5)
+#' ffs <- BestPredFFS_LLOCV(tDat=tDat,classCol = "class",classLocCol="class_location",nk=5)
 
 #' # some code to look at the results
-#' ffs1$selectedvars # show seleted variables
-#' ffs1$perf_all # show performance of all combinations
-#' ffs1$finalModel # show confusion matrix
+#' ffs$selectedvars # show seleted variables
+#' ffs$perf_all # show performance of all combinations
+#' ffs$finalModel # show confusion matrix
 #' @export BestPredFFS_LLOCV
 #' @aliases BestPredFFS_LLOCV
 

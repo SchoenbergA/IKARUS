@@ -29,8 +29,8 @@
 #' # check for class column and predictor columns in input training dataset
 #' head(tDat)
 #' # classification
-#' model1 <- RFclass_LLOCV(tDat = tDat,predCol = "default",predStk = lau_Stk,classCol = "class")
-#' #check model
+#' model1 <- RFclass_LLOCV(tDat = tDat,predCol = "default",predStk = lau_Stk,classCol = "class",nk=5)
+#' # check model
 #' model1$model_LLOCV
 #' # plot prediction
 #' plot(model1$prediction)

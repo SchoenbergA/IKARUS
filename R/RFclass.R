@@ -28,8 +28,11 @@
 #' head(tDat)
 #' # classification
 #' model1 <- RFclass(tDat = tDat,predCol = "default",predStk = lau_Stk,classCol = "class")
-#' #check model
+#' # check model
 #' model1$model_cv
+#'
+#' # plot prediction
+#' plot(model1$prediction)
 
 #' @export RFclass
 #' @aliases RFclass
