@@ -1,0 +1,25 @@
+[general]
+creator=R package 'raster'
+created=2021-01-10 13:42:53
+[georeference]
+nrows=200
+ncols=200
+xmin=970242.659793155
+ymin=6444438.17230046
+xmax=970272.659793155
+ymax=6444468.17230046
+projection=+proj=lcc +lat_0=46.5 +lon_0=3 +lat_1=49 +lat_2=44 +x_0=700000 +y_0=6600000 +ellps=GRS80 +units=m +no_defs
+[data]
+datatype=FLT4S
+byteorder=little
+nbands=3
+bandorder=BIL
+minvalue=0:2:0
+maxvalue=255:255:255
+nodatavalue=-3.4e+38
+[legend]
+legendtype=
+values=
+color=
+[description]
+layername=blue:green:red
