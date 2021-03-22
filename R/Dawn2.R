@@ -14,7 +14,7 @@
 #' @param path_png_cl character - the path to save the resulting plots for classification as png. Required if  "save_png" option is used.
 #' @param path_png_aoa character - the path to save the resulting plots for AOA png. Required if  "save_png" option is used.
 #' @param rsp SpatialPolygons - Response Polygon for a class used for validation.
-#' @param srp_class numeric - The position of the response class in the
+#' @param rsp_class numeric - The position of the response class in the
 #' @return Returns the classification, model and the AOA. Optional saves the resuting RasterLayer and saves resuöting prediction and AOA to .png images.
 #' @details This function is a wrapper for the IKARUS workflow for a LLOCV Random Forest classification and further uses the AOA approach by Meyer 2020.
 #' By default the resulting prediction and AOA are plotted. By default further uses all varibales for the model, optional uses a FFS (if FFS=TRUE). Optional saves the RasterLayers. Further can save the results to .png format to a desired path.
@@ -59,7 +59,7 @@
 
 
 
-Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,save_png=FALSE,save_res=FALSE,path_res,path_png,fsize=24){
+Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,save_png=FALSE,save_res=FALSE,path_res,path_png,fsize=24,rsp=NULL,rsp_class=NULL,validate=F){
 
   ### prepare training data
 
@@ -88,7 +88,7 @@ Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,s
   if(validate == T){
 
     # get position of response class
-    ucl <-unique(Tpoints)
+    ucl <-unique(Tpoints$class)
     # sort for alphabetic order
     sucl <-sort(ucl)
     # get position
@@ -138,21 +138,22 @@ Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,s
   if(plot_res==TRUE){
     if(validate == T){
 
+
       # set main and sub for validation
-      main_val=paste("Response for class",rsp_class)
+      main_val=paste("Response for ",rsp_class)
       sub_val=paste("hit@over: ",val$hitrate,"@",val$overrate)
 
       grid.arrange(
-        spplot(pred,col.regions=viridis(100),sub=sub_cl,main=name_cl,par.settings = list(fontsize = list(text = 12))),
-        spplot(aoa$AOA ,col.regions=c("red","grey") ,main=name_aoa,sub=sub_aoa,par.settings = list(fontsize = list(text = 12))),
-        spplot(pred,col.regions=viridis(100),main=main_val,sub=sub_val)+spplot(response[1],col.regions=c("transparent")),
+        spplot(pred,col.regions=viridis(100),colorkey=NULL,sub=sub_cl,main=name_cl,par.settings = list(fontsize = list(text = 8))),
+        spplot(aoa$AOA ,col.regions=c("red","grey"),colorkey=NULL ,main=name_aoa,sub=sub_aoa,par.settings = list(fontsize = list(text = 8))),
+        spplot(pred,col.regions=viridis(100),colorkey=NULL,main=main_val,sub=sub_val,par.settings = list(fontsize = list(text = 8)))+spplot(rsp[1],col.regions=c("transparent"),col="red",lwd=2,colorkey=NULL),
         ncol=3)
 
     } else{
     # plot prediction and AOA in grid
     grid.arrange(
-      spplot(pred,col.regions=viridis(100),sub=sub_cl,main=name_cl,par.settings = list(fontsize = list(text = 12))),
-      spplot(aoa$AOA ,col.regions=c("red","grey") ,main=name_aoa,sub=sub_aoa,par.settings = list(fontsize = list(text = 12))),
+      spplot(pred,col.regions=viridis(100),colorkey=NULL,sub=sub_cl,main=name_cl,par.settings = list(fontsize = list(text = 12))),
+      spplot(aoa$AOA ,col.regions=c("red","grey"),colorkey=NULL ,main=name_aoa,sub=sub_aoa,par.settings = list(fontsize = list(text = 12))),
       ncol=2)
 
 
@@ -163,6 +164,43 @@ Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,s
   }
 
   if(save_png==TRUE){
+    if(validate == T){
+
+      # set name for validation img
+      name_val <- paste0(Stk_name,"_",form,buf_size*100,"_VAL")
+
+      # save plot code to variable due to png requires print() to run with a function
+      pCL <- spplot(pred,col.regions=viridis(100),colorkey=NULL,sub=sub_cl,main=name_cl,par.settings = list(fontsize = list(text = fsize)))
+      pAO <-spplot(aoa$AOA ,col.regions=c("red","grey") ,colorkey=NULL,main=name_aoa,sub=sub_aoa,par.settings = list(fontsize = list(text = fsize)))
+      pVA <-spplot(pred,col.regions=viridis(100),colorkey=NULL,main=main_val,sub=sub_val,par.settings = list(fontsize = list(text = fsize)))+spplot(rsp[1],col.regions=c("transparent"),col="red",lwd=2,colorkey=NULL)
+
+      # open device for .png
+      png(filename=paste0(path_png,name_cl,".png"))
+      # print the plot
+      print(pCL)
+      # close device
+      dev.off()
+
+      # open device for .png
+      png(filename=paste0(path_png,name_aoa,".png"))
+      # print the plot
+      print(pAO)
+      # close device
+      dev.off()
+
+      # open device for .png
+      png(filename=paste0(path_png,name_val,".png"))
+      # print the plot
+      print(pVA)
+      # close device
+      dev.off()
+
+      # cat path
+      cat(" ",sep = "\n")
+      cat(paste0("images saved to:",path_png,sep = "\n"))
+    }
+
+
     # save plot code to variable due to png requires print() to run with a function
     pCL <- spplot(pred,col.regions=viridis(100),colorkey=NULL,sub=sub_cl,main=name_cl,par.settings = list(fontsize = list(text = fsize)))
     pAO <-spplot(aoa$AOA ,col.regions=c("red","grey") ,colorkey=NULL,main=name_aoa,sub=sub_aoa,par.settings = list(fontsize = list(text = fsize)))
@@ -206,8 +244,9 @@ Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,s
     acc <- paste0("accuracy: ",round(res_values[2],4))
     kap <- paste0("kappa: ",round(res_values[3],4))
     aop <- paste0("AOA_area: ", round(per_aoa,4))
-    vlv <- paste0("hit@over: ",val$hitrate,"@",val$overrate)
-    res_val <- c(acc,kap,aop,vlv)
+    vlh <- paste0("hitrate ",val$hitrate)
+    vlo <- paste0("overrate ",val$overrate)
+    res_val <- c(acc,kap,aop,vlh,vlo)
 
     re <-list("prediction"=cl$prediction,"model_LLOCV"=cl$model_LLOCV,"AOA"=aoa$AOA,"VALUES" <-res_val)
     return(re)
