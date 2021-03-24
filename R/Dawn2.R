@@ -4,7 +4,7 @@
 #' @param Tpoints SpatialPoints - PointLayer with the TrainingPositions
 #' @param buf_size numeric - with for the buffer in meter
 #' @param design character - from for the buffer. Choose from "ROUND","FLAT","SQUARE"
-#' @param Stk RasterStack - with predictors for classfication
+#' @param Stk RasterStack - with predictors for classification
 #' @param Stk_name character - name of input Stack for the name to write in images and output name.
 #' @param plot_res boolean - set 'TRUE' to plot the prediction and AOA. Default = TRUE.
 #' @param save_png boolean - set 'TRUE' to write the images in.png format for prediction and AOA. Default = FALSE.
@@ -15,44 +15,11 @@
 #' @param path_png_aoa character - the path to save the resulting plots for AOA png. Required if  "save_png" option is used.
 #' @param rsp SpatialPolygons - Response Polygon for a class used for validation.
 #' @param rsp_class numeric - The position of the response class in the
-#' @return Returns the classification, model and the AOA. Optional saves the resuting RasterLayer and saves resuöting prediction and AOA to .png images.
+#' @return Returns the classification, model and the AOA. Optional saves the resulting RasterLayer and saves resuöting prediction and AOA to .png images.
 #' @details This function is a wrapper for the IKARUS workflow for a LLOCV Random Forest classification and further uses the AOA approach by Meyer 2020.
 #' By default the resulting prediction and AOA are plotted. By default further uses all varibales for the model, optional uses a FFS (if FFS=TRUE). Optional saves the RasterLayers. Further can save the results to .png format to a desired path.
-#'
+#' Further the 'rsp' argument allow the direct estimation of the model performance by comparing one selected class with a response layer.
 #' @author Andreas Schönberg
-#' @examples
-#' # load libs
-#' require(raster)
-#' require(caret)
-#' require(CAST)
-#' require(doParallel)
-#' require(rgeos)
-
-#' # required for visualization
-#' require(viridis)
-#' require(png)
-#' require(latticeExtra)
-#' require(gridExtra)
-
-#' # load data
-#' lau_Stk <- raster::stack(system.file("extdata","lau_RGB.grd",package = "IKARUS"))
-#' lau_tp <-rgdal::readOGR(system.file("extdata","lau_Tpoints.shp",package = "IKARUS"))
-#' # handle CRS string
-#' crs(lau_tp) <- crs(lau_Stk)
-
-#' ### run Dawn
-#' # with training design 0.3 meter radius in cycles
-#' test1 <- Dawn(FFS = F,Tpoints = lau_tp,buf_size = 0.3,design = "ROUND",Stk = lau_Stk,Stk_name = "RGB")
-
-#' # access results
-#' plot(test1$prediction) # prediciton
-#' plot(test1$AOA) # AOA
-#' test1$model_LLOCV # model
-
-#' ### Test series with DAWN
-#' test1 <- Dawn(FFS = F,Tpoints = lau_tp,buf_size = 0.3,design = "ROUND",Stk = lau_Stk,Stk_name = "RGB")
-#' test2 <- Dawn(FFS = F,Tpoints = lau_tp,buf_size = 0.6,design = "ROUND",Stk = lau_Stk,Stk_name = "RGB")
-#' test3 <- Dawn(FFS = F,Tpoints = lau_tp,buf_size = 1.0,design = "ROUND",Stk = lau_Stk,Stk_name = "RGB")
 
 #' @export Dawn2
 #' @aliases Dawn2
@@ -72,7 +39,9 @@ Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,s
   ###
   # run classification and return prediction
   if(FFS==T){
+    tstart <- Sys.time()
     FFSmodel <- BestPredFFS_LLOCV(tDat=tDat,classCol = "class",classLocCol="class_location",nk=5)
+    tstop <- Sys.time()
     # compute prediction and arrange pred and model equal to outpout from RFclassLLOCV to fit in following dawn code
     pred <- raster::predict(Stk,FFSmodel)
 
@@ -81,7 +50,9 @@ Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,s
     cat(" ",sep = "\n")
     cat("IKARUS finished",sep = "\n")
   } else {
+    tstart <- Sys.time()
     cl <- RFclass_LLOCV(tDat = tDat,nk=5,predStk = Stk,classCol = "class")
+    tstop <- Sys.time()
   }
 
 
@@ -150,15 +121,15 @@ Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,s
         ncol=3)
 
     } else{
-    # plot prediction and AOA in grid
-    grid.arrange(
-      spplot(pred,col.regions=viridis(100),colorkey=NULL,sub=sub_cl,main=name_cl,par.settings = list(fontsize = list(text = 12))),
-      spplot(aoa$AOA ,col.regions=c("red","grey"),colorkey=NULL ,main=name_aoa,sub=sub_aoa,par.settings = list(fontsize = list(text = 12))),
-      ncol=2)
+      # plot prediction and AOA in grid
+      grid.arrange(
+        spplot(pred,col.regions=viridis(100),colorkey=NULL,sub=sub_cl,main=name_cl,par.settings = list(fontsize = list(text = 12))),
+        spplot(aoa$AOA ,col.regions=c("red","grey"),colorkey=NULL ,main=name_aoa,sub=sub_aoa,par.settings = list(fontsize = list(text = 12))),
+        ncol=2)
 
 
-    cat(" ",sep = "\n")
-    cat("plotting results",sep = "\n")
+      cat(" ",sep = "\n")
+      cat("plotting results",sep = "\n")
     }
 
   }
@@ -239,25 +210,43 @@ Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,s
   cat(" ",sep = "\n")
   cat("finished",sep = "\n")
 
+  # caluclate timediffenrence
+  timedif <-difftime(tstop,tstart,units = "min")
+  timedif
+
+  # print without "timediffernece" add
+  tdf <-paste(round(timedif,4),units(timedif))
+
   # save values
   if(validate == T){
-    acc <- paste0("accuracy: ",round(res_values[2],4))
-    kap <- paste0("kappa: ",round(res_values[3],4))
-    aop <- paste0("AOA_area: ", round(per_aoa,4))
-    vlh <- paste0("hitrate ",val$hitrate)
-    vlo <- paste0("overrate ",val$overrate)
-    res_val <- c(acc,kap,aop,vlh,vlo)
+    # data frame
+    df <- data.frame(matrix(nrow = 1, ncol = 7))
 
-    re <-list("prediction"=cl$prediction,"model_LLOCV"=cl$model_LLOCV,"AOA"=aoa$AOA,"VALUES" <-res_val)
+    colnames(df) <- c("Stk/design", "accuracy","kappa","AOA","Val_hit","Val_over","runtime")
+    df[1] <- paste0(Stk_name,"_",form,buf_size*100)
+    df[2] <- round(res_values[2],4)
+    df[3] <- round(res_values[3],4)
+    df[4] <- round(per_aoa,4)
+    df[5] <- val$hitrate
+    df[6] <- val$overrate
+    df[7] <- tdf
+
+
+    re <-list("prediction"=cl$prediction,"model_LLOCV"=cl$model_LLOCV,"AOA"=aoa$AOA,"VALUES" =df)
     return(re)
   }
 
-  acc <- paste0("accuracy: ",round(res_values[2],4))
-  kap <- paste0(" kappa: ",round(res_values[3],4))
-  aop <- paste0("AOA_area: ", round(per_aoa,4))
-  res_val <- c(acc,kap,aop)
+  # save values
+  df <- data.frame(matrix(nrow = 1, ncol = 7))
 
-  re <-list("prediction"=cl$prediction,"model_LLOCV"=cl$model_LLOCV,"AOA"=aoa$AOA,"VALUES" <-res_val)
+  colnames(df) <- c("Stk/design", "accuracy","kappa","AOA","Val_hit","Val_over","runtime")
+  df[1] <- paste0(Stk_name,"_",form,buf_size*100)
+  df[2] <- round(res_values[2],4)
+  df[3] <- round(res_values[3],4)
+  df[4] <- round(per_aoa,4)
+  df[7] <- tdf
+
+  re <-list("prediction"=cl$prediction,"model_LLOCV"=cl$model_LLOCV,"AOA"=aoa$AOA,"VALUES" =df)
   return(re)
 
 } # end function
