@@ -14,7 +14,8 @@
 #' @param path_png_cl character - the path to save the resulting plots for classification as png. Required if  "save_png" option is used.
 #' @param path_png_aoa character - the path to save the resulting plots for AOA png. Required if  "save_png" option is used.
 #' @param rsp SpatialPolygons - Response Polygon for a class used for validation.
-#' @param rsp_class numeric - The position of the response class in the
+#' @param rsp_class character - The name of the response class.
+#' @param tunit character - Unit which should be use for the runtime displayed in the results. Default = "sec".
 #' @return Returns the classification, model and the AOA. Optional saves the resulting RasterLayer and saves resuöting prediction and AOA to .png images.
 #' @details This function is a wrapper for the IKARUS workflow for a LLOCV Random Forest classification and further uses the AOA approach by Meyer 2020.
 #' By default the resulting prediction and AOA are plotted. By default further uses all varibales for the model, optional uses a FFS (if FFS=TRUE). Optional saves the RasterLayers. Further can save the results to .png format to a desired path.
@@ -26,7 +27,7 @@
 
 
 
-Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,save_png=FALSE,save_res=FALSE,path_res,path_png,fsize=24,rsp=NULL,rsp_class=NULL,validate=F){
+Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,save_png=FALSE,save_res=FALSE,path_res,path_png,fsize=24,rsp=NULL,rsp_class=NULL,validate=F,tunit="sec"){
 
   ### prepare training data
 
@@ -211,7 +212,7 @@ Dawn2 <- function(FFS=FALSE,Tpoints,buf_size,design,Stk,Stk_name,plot_res=TRUE,s
   cat("finished",sep = "\n")
 
   # caluclate timediffenrence
-  timedif <-difftime(tstop,tstart,units = "min")
+  timedif <-difftime(tstop,tstart,units = tunit)
   timedif
 
   # print without "timediffernece" add
