@@ -1,9 +1,11 @@
-#' Random Forest Classification with Random Cross-Validation
-#' @description RF Classification with CV
+#' Random Forest Classification with Leave Location Out Cross-Validation
+#' @description RF Classification with LLOCV
 #' @param tDat data.frame - with values of the predictors (see details)
 #' @param predStk - RasterStack - with the predictors.
 #' @param predCol numeric - seq of columns with predictor values. By default uses 1:(length(tDat)-1) for tDat format computed by IKARUS::exrct_Traindat
 #' @param classCol character - name of the column containing the class information
+#' @param classLocCol character - name of the column containing the class and location information
+#' @param nk - numeric - number for k in spacefolds
 #' @param Cores numeric - amount of Cores to exclude from calculation, default = 1
 #' @return returns a list with the model and the prediction
 #' @details
@@ -23,22 +25,21 @@
 #' # handle CRS string
 #' crs(lau_tP) <- crs(lau_Stk)
 #' ### extract values using 'exrct_Tdat' to generate training dataset
-#' tDat <- exrct_Traindat(lau_tP,lau_Stk,"class")
+#' tDat <- exrct_Traindat_LLOCV(lau_tP,lau_Stk,classCol="class",locname="location")
 #' # check for class column and predictor columns in input training dataset
 #' head(tDat)
 #' # classification
-#' model1 <- RFclass(tDat = tDat,predCol = "default",predStk = lau_Stk,classCol = "class")
+#' model1 <- RFclass_LLOCV(tDat = tDat,predCol = "default",predStk = lau_Stk,classCol = "class",nk=5)
 #' # check model
-#' model1$model_cv
-#'
+#' model1$model_LLOCV
 #' # plot prediction
 #' plot(model1$prediction)
 
-#' @export RFclass
-#' @aliases RFclass
+#' @export RFclass_LLOCV
+#' @aliases RFclass_LLOCV
 
 
-RFclass <- function(tDat,predCol="default",predStk=NULL,classCol="class",Cores=1){
+RFclass_LLOCV <- function(tDat,predCol="default",predStk=NULL,classCol="class",classLocCol="class_location",nk=NULL,Cores=1){
 
   # check input
   cat("checking inputs ",sep="\n")
@@ -46,70 +47,95 @@ RFclass <- function(tDat,predCol="default",predStk=NULL,classCol="class",Cores=1
   if(is.null(predStk)){
     stop("missing argument predStk")
   }
-      if(is.null(predCol)){
-        stop("missing argument predCol")
-      }
-          if(is.null(classCol)){
-            stop("missing argument classCol")
-          }
-                  if(any(names(tDat)==classCol)==FALSE){
-                    stop("selected column name for 'classCol' could not be found in tDat")
-                  }
-                      # prepare class column
-                      classColumn <- which(names(tDat)==classCol)
-                      # prepare predictor columns
-                      if(any(predCol=="default")==TRUE){
-                        predCol <- seq(1:(length(tDat)-1))
-                      }
+  if(is.null(predCol)){
+    stop("missing argument predCol")
+  }
+  if(is.null(classCol)){
+    stop("missing argument classCol")
+  }
+  if(is.null(classLocCol)){
+    stop("missing argument classLocCol")
+  }
+  if(is.null(nk)){
+    stop("missing argument nk")
+  }
+  if(any(names(tDat)==classCol)==FALSE){
+    stop("selected column name for 'classCol' could not be found in tDat")
+  }
 
-                      # selected predictor check
-                      npred <-length(predCol)
-                      nlayStk <- nlayers(predStk)
-                      if(identical(npred,nlayStk)==FALSE){
-                        stop("number of selected predictors in Stack is not equal to number of selected predictors in Tdat ")
-                      }
+  ### prepare input parameters and default
+
+  # prepare class column
+  classColumn <- which(names(tDat)==classCol)
+
+  # prepare predictor columns if default
+  if(any(predCol=="default")==TRUE){
+    predCol <- seq(1:(length(tDat)-3))
+  }
+
+  # selected predictor check
+  npred <-length(predCol)
+  nlayStk <- nlayers(predStk)
+  if(identical(npred,nlayStk)==FALSE){
+    stop("number of selected predictors in Stack is not equal to number of selected predictors in Tdat ")
+  }
   cat("using predictors:  ")
   cat(paste(names(tDat[,predCol]),collapse = ", "),sep="\n")
+
   # prepare Cores
   cl =  makeCluster(detectCores()-Cores)
   cat(paste("using",length(cl),"of",length(cl)+Cores,"availible Cores"),sep="\n")
 
+  ### prepare LLOCV
+
   #set seed
   set.seed(112019)
-  #create trainControl for CV
-  tC <-trainControl(method = "cv", number = 5)
+
+  #create Spacefolds, k= amount of unique spatial units
+  indices = CAST::CreateSpacetimeFolds(tDat, spacevar = classLocCol, k = nk)
+
+  #set seed
+  set.seed(112019)
+
+  #create trainControl for LLOCV
+  tC <-trainControl(method = "cv", classProbs = TRUE, index = indices$index, indexOut = indices$indexOut)
   cat(" ",sep = "\n")
-  cat("IKARUS starting model with CV",sep = "\n")
+  cat("IKARUS starting model with LLOCV",sep = "\n")
   # start cores
   set.seed(112019)
   registerDoParallel(cl)
-  #start RF
+
+  #start RF LLOCV
   starttime <- Sys.time()
-  CVmodel = caret::train(tDat[,predCol],
-                         tDat[,classColumn],
-                         method = "rf", withinSE = FALSE, metric= "Kappa",
-                         importance = TRUE, trControl =tC)
+  LLOCVmodel = caret::train(tDat[,predCol],
+                            tDat[,classColumn],
+                            method = "rf", withinSE = FALSE, metric= "Kappa",
+                            importance = TRUE, trControl = tC)
   #stop RF
   stopCluster(cl)
   stoptime <- Sys.time()
+
+  # calculate time
   diftim <-round(difftime(stoptime,starttime,units = "hours"),4)
   cat(" ",sep = "\n")
   cat("finished model",sep = "\n")
   cat(paste0("needed ",diftim," hours",sep = "\n"))
   cat("best result:",sep = "\n")
   cat(" ",sep = "\n")
+
   # results
-  print(subset(CVmodel$results, mtry == CVmodel$bestTune[1,1]))
+  print(subset(LLOCVmodel$results, mtry == LLOCVmodel$bestTune[1,1]))
   cat("order of classes:",sep = "\n")
-  print(CVmodel$level[1:length(CVmodel$level)])
+  print(LLOCVmodel$level[1:length(LLOCVmodel$level)])
   cat(" ",sep = "\n")
+
   # predict
   cat("IKARUS starting prediciton",sep = "\n")
 
-  pred <- raster::predict(predStk,CVmodel)
+  pred <- raster::predict(predStk,LLOCVmodel)
 
   # list output
-  LS_output <- list("prediction"=pred,"model_cv"=CVmodel)
+  LS_output <- list("prediction"=pred,"model_LLOCV"=LLOCVmodel)
   cat(" ",sep = "\n")
   cat("IKARUS finished",sep = "\n")
   return(LS_output)
